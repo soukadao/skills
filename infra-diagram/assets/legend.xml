@@ -1,0 +1,69 @@
+<mxGraphModel dx="900" dy="650" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="600" math="0" shadow="0" adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="legend" value="凡例" style="swimlane;startSize=18;rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#c9d1d9;fontStyle=1;fontSize=9;container=1;" vertex="1" parent="1">
+      <mxGeometry x="630" y="410" width="188" height="122" as="geometry"/>
+    </mxCell>
+    <mxCell id="apiLine" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=classic;strokeColor=#222222;strokeWidth=1.3;" edge="1" parent="legend" source="apiStart" target="apiEnd">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="apiStart" value="" style="ellipse;html=1;fillColor=#222222;strokeColor=#222222;" vertex="1" parent="legend">
+      <mxGeometry x="8" y="30" width="3" height="3" as="geometry"/>
+    </mxCell>
+    <mxCell id="apiEnd" value="" style="ellipse;html=1;fillColor=#222222;strokeColor=#222222;" vertex="1" parent="legend">
+      <mxGeometry x="92" y="30" width="3" height="3" as="geometry"/>
+    </mxCell>
+    <mxCell id="apiText" value="通常通信 / API" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=8;spacing=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="legend">
+      <mxGeometry x="102" y="21" width="75" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="dataLine" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=classic;strokeColor=#2e7d32;strokeWidth=1.3;" edge="1" parent="legend" source="dataStart" target="dataEnd">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="dataStart" value="" style="ellipse;html=1;fillColor=#2e7d32;strokeColor=#2e7d32;" vertex="1" parent="legend">
+      <mxGeometry x="8" y="50" width="3" height="3" as="geometry"/>
+    </mxCell>
+    <mxCell id="dataEnd" value="" style="ellipse;html=1;fillColor=#2e7d32;strokeColor=#2e7d32;" vertex="1" parent="legend">
+      <mxGeometry x="92" y="50" width="3" height="3" as="geometry"/>
+    </mxCell>
+    <mxCell id="dataText" value="S3 / データアクセス" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=8;spacing=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="legend">
+      <mxGeometry x="102" y="41" width="75" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="monitoringLine" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=classic;strokeColor=#6b7280;strokeWidth=1.3;dashed=1;dashPattern=4 3;" edge="1" parent="legend" source="monitoringStart" target="monitoringEnd">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="monitoringStart" value="" style="ellipse;html=1;fillColor=#6b7280;strokeColor=#6b7280;" vertex="1" parent="legend">
+      <mxGeometry x="8" y="70" width="3" height="3" as="geometry"/>
+    </mxCell>
+    <mxCell id="monitoringEnd" value="" style="ellipse;html=1;fillColor=#6b7280;strokeColor=#6b7280;" vertex="1" parent="legend">
+      <mxGeometry x="92" y="70" width="3" height="3" as="geometry"/>
+    </mxCell>
+    <mxCell id="monitoringText" value="監視・ログ" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=8;spacing=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="legend">
+      <mxGeometry x="102" y="61" width="75" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="securityLine" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=classic;strokeColor=#c62828;strokeWidth=1.3;dashed=1;dashPattern=4 3;" edge="1" parent="legend" source="securityStart" target="securityEnd">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="securityStart" value="" style="ellipse;html=1;fillColor=#c62828;strokeColor=#c62828;" vertex="1" parent="legend">
+      <mxGeometry x="8" y="90" width="3" height="3" as="geometry"/>
+    </mxCell>
+    <mxCell id="securityEnd" value="" style="ellipse;html=1;fillColor=#c62828;strokeColor=#c62828;" vertex="1" parent="legend">
+      <mxGeometry x="92" y="90" width="3" height="3" as="geometry"/>
+    </mxCell>
+    <mxCell id="securityText" value="セキュリティ制御" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=8;spacing=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="legend">
+      <mxGeometry x="102" y="81" width="75" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="cicdLine" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=classic;strokeColor=#7E3FF2;strokeWidth=1.5;" edge="1" parent="legend" source="cicdStart" target="cicdEnd">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="cicdStart" value="" style="ellipse;html=1;fillColor=#7E3FF2;strokeColor=#7E3FF2;" vertex="1" parent="legend">
+      <mxGeometry x="8" y="110" width="3" height="3" as="geometry"/>
+    </mxCell>
+    <mxCell id="cicdEnd" value="" style="ellipse;html=1;fillColor=#7E3FF2;strokeColor=#7E3FF2;" vertex="1" parent="legend">
+      <mxGeometry x="92" y="110" width="3" height="3" as="geometry"/>
+    </mxCell>
+    <mxCell id="cicdText" value="CI/CD" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=8;spacing=0;spacingLeft=0;spacingRight=0;" vertex="1" parent="legend">
+      <mxGeometry x="102" y="101" width="75" height="20" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

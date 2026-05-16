@@ -1,0 +1,16 @@
+.idea
+.vscode
+
+.claude
+.mcp.json
+
+.agents
+.codex
+
+.env
+.env.*
+
+tmp/
+test/
+
+TODO.md
