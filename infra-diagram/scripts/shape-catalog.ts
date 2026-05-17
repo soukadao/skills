@@ -87,7 +87,7 @@ Examples:
   tsx shape-catalog.ts list
   tsx shape-catalog.ts list common
   tsx shape-catalog.ts list aws
-  tsx shape-catalog.ts style common arrow
+  tsx shape-catalog.ts style common right-arrow
   tsx shape-catalog.ts style aws vpc`);
 }
 

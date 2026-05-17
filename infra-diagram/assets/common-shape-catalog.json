@@ -31,6 +31,10 @@
         {
           "name": "ci-cd-arrow",
           "style": "edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;startArrow=none;strokeColor=#7E3FF2;strokeWidth=1.5;rounded=0;labelBackgroundColor=none;"
+        },
+        {
+          "name": "line",
+          "style": "endArrow=none;html=1;rounded=0;"
         }
       ]
     },

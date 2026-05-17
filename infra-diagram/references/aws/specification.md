@@ -2,18 +2,58 @@
 
 ## 基本ルール
 
+- AWS構成図では `AWS Cloud` 境界を原則として配置し、AWSサービスはその内側、ユーザー・GitHub・オンプレミス・外部SaaSなどはその外側に配置する
 - ユーザーやPCなどの表現をする時は`aws-illustrations`から図形を検索する
 - `AWS Cloud`、`Region`、`VPC`、`Subnet`、`Availability Zone`は**AWS Group**を使用する
 - `AWS Cloud`の外に凡例が配置されるようにする(凡例の右端 + 30px <= AWS Cloudの左端)
 - `AWS Cloud`、`Region`、`VPC`、`Subnet`などのAWS境界をまたぐ線は最小限にする
 - AWSサービスアイコンのサイズは原則としてすべて `64 x 64` に統一する
 - AWSサービスアイコンはラベルがアイコン下部に表示されるため、配置領域は `64 x 96` 以上として扱う
+- AWSサービスをカテゴリ別のコンテナや小さな枠で表現する場合、コンテナのラベルはカテゴリ名、サービスアイコンのラベルはサービス名にする
+- サービスアイコンへ線を接続する場合は、カテゴリコンテナやAWS Groupではなくサービスアイコン自体をsource/targetにする
+- 外部アクター、AWSサービス、AWS Group、凡例はすべて10px単位の座標に揃える
 - AWS Groupは `swimlane` ではなくタイトル領域を自動予約しないため、子要素はGroupの上端から最低 `50px` 下げて配置する
 - AWS Group内の子要素は、Groupのタイトル文字・グループアイコン・境界線から最低 `30px` 離す
 - AWS Groupを入れ子にする場合、内側Groupは外側Groupの上端から最低 `60px` 下げ、左右下に最低 `30px` の余白を取る
 - AWS Groupの上部にはタイトル文字とグループアイコンの領域として最低 `50px` を確保し、その領域にはサービスアイコン、線、注釈テキストを配置しない
 - AWS Group同士を隣接させる場合、外枠同士の間隔は最低 `30px`、タイトルやラベルが近接する場合は最低 `50px` 取る
 - AWS Groupを横断する線は境界線やタイトル文字に沿わせず、境界から最低 `20px` 離して通す
+- `fillColor` や `strokeColor` に明示色を使う場合は、可能な範囲で `light-dark()` または `adaptiveColors="auto"` を併用し、ダークモードでも線・文字・境界が読めるようにする
+
+## 表示標準
+
+- タイトルは図の左上に置き、本文領域から最低 `30px` 離す。必要であれば短いサブタイトルを添える
+- フォントは原則として `Helvetica` を使用する
+- タイトルは `30px` 太字、サブタイトルは `16px`、AWS Groupラベルは `12px`、サービスラベルは `10px`、注釈や線ラベルは `11px` を目安にする
+- サービスカテゴリの色分けを使う場合は、以下を目安にする。ただし既存カタログのstyleを優先し、色だけを理由にstyleを手書きで作らない
+  - Compute: `#ED7100`
+  - Database: `#C925D1`
+  - Storage: `#3F8624`
+  - Networking / Analytics: `#8C4FFF`
+  - App Integration: `#E7157B`
+  - AI / ML: `#01A88D`
+  - Security: `#DD344C`
+  - General / Auxiliary: `#666666`
+- 手順を説明する図では、番号バッジと凡例のステップ説明を組み合わせてよい。番号バッジは `28 x 28` を目安にし、主線・アイコン・ラベルと重ならない位置に置く
+- API名、イベント名、処理名などが重要な場合だけ短い注釈を置く。プロトコル名だけの線ラベルは置かない
+- 絵文字は使わない
+
+## AWS図形検索
+
+AWSサービス、AWS Group、AWS外のユーザー表現は `scripts/shape-catalog.ts` の `aws` カタログから検索して使用する。
+
+利用可能なAWS図形一覧を確認する:
+
+```bash
+tsx scripts/shape-catalog.ts list aws
+```
+
+特定のAWS図形のstyleを取得する:
+
+```bash
+tsx scripts/shape-catalog.ts style aws vpc
+tsx scripts/shape-catalog.ts style aws elastic-load-balancing
+```
 
 ## 図種別の判定
 
@@ -62,6 +102,7 @@
 ## AWS図の検証
 
 - AWS図のdraw.io XMLを作成した後は、`scripts/aws-validate-diagram.ts` で検証する
+- 検証前に、AWS Cloud境界があること、外部アクターがAWS Cloud外にあること、AWSサービスがAWS Cloud内にあること、主経路が一方向に読めることを目視で確認する
 - 検証対象は、AWSサービスアイコン同士の重なり、AWS Cloudからのはみ出し、線がAWSサービスアイコンやラベル領域の上を通っていないこと、矢印や線同士が同じ経路上で重なっていないこと
 - AWSサービスアイコンの重なり、AWS Cloud境界からのはみ出し、線とサービスアイコンの重なり、線同士の重なりは、この検証結果で判定する
 - 検証に失敗した場合は、サービスアイコンの位置、AWS CloudやGroupのサイズ、線の経路を修正してから再検証する

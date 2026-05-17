@@ -46,6 +46,10 @@ const SERVICE_LABEL_HEIGHT = 32;
 const GROUP_BORDER_TOLERANCE = 2;
 const EDGE_OVERLAP_TOLERANCE = 2;
 const MIN_EDGE_OVERLAP_LENGTH = 12;
+const EDGE_ICON_TOUCH_TOLERANCE = 1;
+const MIN_GROUP_GAP = 30;
+const GROUP_HEADER_HEIGHT = 50;
+const MAX_EDGE_WAYPOINTS = 1;
 
 function decodeXml(value: string): string {
   return value
@@ -79,10 +83,11 @@ function parseNumber(value: string | undefined): number {
 
 function parseCells(xml: string): Map<string, Cell> {
   const cells = new Map<string, Cell>();
-  const cellPattern = /<mxCell\b([^>]*)(?:\/>|>([\s\S]*?)<\/mxCell>)/g;
+  const normalizedXml = xml.replace(/<mxCell\b([^>]*)\/>/g, "<mxCell$1></mxCell>");
+  const cellPattern = /<mxCell\b([^>]*)>([\s\S]*?)<\/mxCell>/g;
   let match: RegExpExecArray | null;
 
-  while ((match = cellPattern.exec(xml))) {
+  while ((match = cellPattern.exec(normalizedXml))) {
     const attrs = parseAttributes(match[1]);
     const body = match[2] ?? "";
     const geometryMatch = body.match(/<mxGeometry\b([^>]*)(?:\/>|>[\s\S]*?<\/mxGeometry>)/);
@@ -170,11 +175,56 @@ function isAwsServiceIcon(cell: Cell): boolean {
     return false;
   }
 
+  const resourceIcon = styleValue(cell.style, "resIcon");
+  if (resourceIcon === "mxgraph.aws4.users" || resourceIcon === "mxgraph.aws4.user") {
+    return false;
+  }
+
   return !shape.startsWith("mxgraph.aws4.group") && !shape.startsWith("mxgraph.aws4.illustration_");
+}
+
+function isLegendCell(cell: Cell, cells: Map<string, Cell>): boolean {
+  return cell.id.startsWith("legend") || parentChain(cell, cells).some((parent) => parent.id.startsWith("legend"));
+}
+
+function isPlainLine(edge: Cell): boolean {
+  if (!edge.edge) {
+    return false;
+  }
+
+  const startArrow = styleValue(edge.style, "startArrow");
+  const endArrow = styleValue(edge.style, "endArrow");
+  return (!startArrow || startArrow === "none") && (!endArrow || endArrow === "none");
 }
 
 function isAwsCloudGroup(cell: Cell): boolean {
   return cell.vertex && cell.style.includes("grIcon=mxgraph.aws4.group_aws_cloud");
+}
+
+function isAwsRegionGroup(cell: Cell): boolean {
+  return cell.vertex && cell.style.includes("grIcon=mxgraph.aws4.group_region");
+}
+
+function isAwsVpcGroup(cell: Cell): boolean {
+  return cell.vertex && cell.style.includes("grIcon=mxgraph.aws4.group_vpc");
+}
+
+function isAwsAvailabilityZoneGroup(cell: Cell): boolean {
+  return cell.vertex && normalizedValue(cell).includes("availability zone");
+}
+
+function isAwsSubnetGroup(cell: Cell): boolean {
+  const value = normalizedValue(cell);
+  return cell.vertex && (value.includes("subnet") || cell.style.includes("grIcon=mxgraph.aws4.group_security_group"));
+}
+
+function normalizedValue(cell: Cell): string {
+  return cell.value
+    .replace(/&#xa;/gi, " ")
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<[^>]+>/g, "")
+    .toLowerCase()
+    .trim();
 }
 
 function isStyledAwsGroup(cell: Cell): boolean {
@@ -221,6 +271,14 @@ function parentChain(cell: Cell, cells: Map<string, Cell>): Cell[] {
   return parents;
 }
 
+function isDescendantOf(cell: Cell, ancestor: Cell, cells: Map<string, Cell>): boolean {
+  return parentChain(cell, cells).some((parent) => parent.id === ancestor.id);
+}
+
+function hasAncestorRelation(first: Cell, second: Cell, cells: Map<string, Cell>): boolean {
+  return isDescendantOf(first, second, cells) || isDescendantOf(second, first, cells);
+}
+
 function serviceRect(cell: Cell, cells: Map<string, Cell>): Rect | undefined {
   const rect = absoluteRect(cell, cells);
   if (!rect) {
@@ -232,6 +290,20 @@ function serviceRect(cell: Cell, cells: Map<string, Cell>): Rect | undefined {
     y: rect.y,
     width: Math.max(rect.width, 64),
     height: Math.max(rect.height + SERVICE_LABEL_HEIGHT, 96),
+  };
+}
+
+function iconRect(cell: Cell, cells: Map<string, Cell>): Rect | undefined {
+  const rect = absoluteRect(cell, cells);
+  if (!rect) {
+    return undefined;
+  }
+
+  return {
+    x: rect.x,
+    y: rect.y,
+    width: Math.max(rect.width, 64),
+    height: Math.max(rect.height, 64),
   };
 }
 
@@ -267,6 +339,47 @@ function containsWithPadding(container: Rect, item: Rect, padding: number): bool
     item.x + item.width <= container.x + container.width - padding &&
     item.y + item.height <= container.y + container.height - padding
   );
+}
+
+function containsWithoutPadding(container: Rect, item: Rect): boolean {
+  return (
+    item.x >= container.x &&
+    item.y >= container.y &&
+    item.x + item.width <= container.x + container.width &&
+    item.y + item.height <= container.y + container.height
+  );
+}
+
+function insetRect(rect: Rect, amount: number): Rect {
+  return {
+    x: rect.x + amount,
+    y: rect.y + amount,
+    width: Math.max(0, rect.width - amount * 2),
+    height: Math.max(0, rect.height - amount * 2),
+  };
+}
+
+function minDistanceBetweenRects(a: Rect, b: Rect): number {
+  if (intersects(a, b)) {
+    return 0;
+  }
+
+  const horizontalGap = Math.max(a.x - (b.x + b.width), b.x - (a.x + a.width), 0);
+  const verticalGap = Math.max(a.y - (b.y + b.height), b.y - (a.y + a.height), 0);
+  return Math.max(horizontalGap, verticalGap);
+}
+
+function groupContentRect(group: Rect): Rect {
+  return {
+    x: group.x + MIN_ICON_GROUP_PADDING,
+    y: group.y + GROUP_HEADER_HEIGHT,
+    width: Math.max(0, group.width - MIN_ICON_GROUP_PADDING * 2),
+    height: Math.max(0, group.height - GROUP_HEADER_HEIGHT - MIN_ICON_GROUP_PADDING),
+  };
+}
+
+function area(rect: Rect): number {
+  return rect.width * rect.height;
 }
 
 function segmentIntersectsRect(a: Point, b: Point, rect: Rect): boolean {
@@ -327,6 +440,19 @@ function edgeSegments(edge: Cell, cells: Map<string, Cell>): Array<[Point, Point
 }
 
 function edgeCollisionSegments(edge: Cell, cells: Map<string, Cell>): Array<[Point, Point]> {
+  if (edge.style.includes("edgeStyle=orthogonalEdgeStyle") && edge.points.length === 0) {
+    return visibleOrthogonalCandidatePaths(edge, cells).flatMap(pathToSegments);
+  }
+
+  const path = visibleEdgePath(edge, cells);
+  if (!edge.style.includes("edgeStyle=orthogonalEdgeStyle")) {
+    return pathToSegments(path);
+  }
+
+  return orthogonalCollisionSegments(path, false);
+}
+
+function visibleOrthogonalCandidatePaths(edge: Cell, cells: Map<string, Cell>): Point[][] {
   if (!edge.source || !edge.target) {
     return [];
   }
@@ -342,25 +468,138 @@ function edgeCollisionSegments(edge: Cell, cells: Map<string, Cell>): Array<[Poi
 
   const sourceCenter = center(sourceRect);
   const targetCenter = center(targetRect);
-
-  if (edge.points.length > 0) {
-    return pathToSegments([sourceCenter, ...edge.points, targetCenter]);
-  }
-
-  if (!edge.style.includes("edgeStyle=orthogonalEdgeStyle")) {
-    return pathToSegments([sourceCenter, targetCenter]);
-  }
-
-  const midX = sourceCenter.x + (targetCenter.x - sourceCenter.x) / 2;
-  const midY = sourceCenter.y + (targetCenter.y - sourceCenter.y) / 2;
+  const sourceIconRect = source && isAwsServiceIcon(source) ? iconRect(source, cells) : undefined;
+  const targetIconRect = target && isAwsServiceIcon(target) ? iconRect(target, cells) : undefined;
   const candidatePaths = [
-    [sourceCenter, { x: midX, y: sourceCenter.y }, { x: midX, y: targetCenter.y }, targetCenter],
-    [sourceCenter, { x: sourceCenter.x, y: midY }, { x: targetCenter.x, y: midY }, targetCenter],
     [sourceCenter, { x: targetCenter.x, y: sourceCenter.y }, targetCenter],
     [sourceCenter, { x: sourceCenter.x, y: targetCenter.y }, targetCenter],
   ];
 
-  return dedupeSegments(candidatePaths.flatMap(pathToSegments));
+  return candidatePaths.map((candidatePath) => trimVisiblePath(candidatePath, sourceIconRect, targetIconRect));
+}
+
+function trimVisiblePath(path: Point[], sourceIconRect: Rect | undefined, targetIconRect: Rect | undefined): Point[] {
+  let visiblePath = path;
+  if (sourceIconRect) {
+    visiblePath = trimPathStartToRectBoundary(visiblePath, sourceIconRect);
+  }
+
+  if (targetIconRect) {
+    visiblePath = trimPathEndToRectBoundary(visiblePath, targetIconRect);
+  }
+
+  return visiblePath;
+}
+
+function visibleDirectEdgePath(edge: Cell, cells: Map<string, Cell>): Point[] {
+  if (!edge.source || !edge.target) {
+    return [];
+  }
+
+  const source = cells.get(edge.source);
+  const target = cells.get(edge.target);
+  const sourceRect = source ? absoluteRect(source, cells) : undefined;
+  const targetRect = target ? absoluteRect(target, cells) : undefined;
+
+  if (!sourceRect || !targetRect) {
+    return [];
+  }
+
+  const path = [center(sourceRect), center(targetRect)];
+  const sourceIconRect = source && isAwsServiceIcon(source) ? iconRect(source, cells) : undefined;
+  const targetIconRect = target && isAwsServiceIcon(target) ? iconRect(target, cells) : undefined;
+  return trimVisiblePath(path, sourceIconRect, targetIconRect);
+}
+
+function visibleEdgePath(edge: Cell, cells: Map<string, Cell>): Point[] {
+  let path = edgePath(edge, cells);
+  if (path.length < 2) {
+    return path;
+  }
+
+  const source = edge.source ? cells.get(edge.source) : undefined;
+  const sourceRect = source && isAwsServiceIcon(source) ? iconRect(source, cells) : undefined;
+  if (sourceRect) {
+    path = trimPathStartToRectBoundary(path, sourceRect);
+  }
+
+  const target = edge.target ? cells.get(edge.target) : undefined;
+  const targetRect = target && isAwsServiceIcon(target) ? iconRect(target, cells) : undefined;
+  if (targetRect) {
+    path = trimPathEndToRectBoundary(path, targetRect);
+  }
+
+  return path;
+}
+
+function trimPathStartToRectBoundary(path: Point[], rect: Rect): Point[] {
+  const start = path[0];
+  if (!pointInRect(start, rect)) {
+    return path;
+  }
+
+  for (let i = 1; i < path.length; i += 1) {
+    if (pointInRect(path[i], rect)) {
+      continue;
+    }
+
+    const boundary = segmentRectBoundaryIntersection(start, path[i], rect);
+    return boundary ? [boundary, ...path.slice(i)] : path;
+  }
+
+  return path;
+}
+
+function trimPathEndToRectBoundary(path: Point[], rect: Rect): Point[] {
+  const end = path[path.length - 1];
+  if (!pointInRect(end, rect)) {
+    return path;
+  }
+
+  for (let i = path.length - 2; i >= 0; i -= 1) {
+    if (pointInRect(path[i], rect)) {
+      continue;
+    }
+
+    const boundary = segmentRectBoundaryIntersection(end, path[i], rect);
+    return boundary ? [...path.slice(0, i + 1), boundary] : path;
+  }
+
+  return path;
+}
+
+function segmentRectBoundaryIntersection(inside: Point, outside: Point, rect: Rect): Point | undefined {
+  const dx = outside.x - inside.x;
+  const dy = outside.y - inside.y;
+  const candidates: Point[] = [];
+
+  for (const x of [rect.x, rect.x + rect.width]) {
+    if (dx === 0) {
+      continue;
+    }
+    const t = (x - inside.x) / dx;
+    const y = inside.y + t * dy;
+    if (t > 0 && t <= 1 && y >= rect.y && y <= rect.y + rect.height) {
+      candidates.push({ x, y });
+    }
+  }
+
+  for (const y of [rect.y, rect.y + rect.height]) {
+    if (dy === 0) {
+      continue;
+    }
+    const t = (y - inside.y) / dy;
+    const x = inside.x + t * dx;
+    if (t > 0 && t <= 1 && x >= rect.x && x <= rect.x + rect.width) {
+      candidates.push({ x, y });
+    }
+  }
+
+  return candidates.sort((a, b) => distanceSquared(inside, a) - distanceSquared(inside, b))[0];
+}
+
+function distanceSquared(a: Point, b: Point): number {
+  return (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
 }
 
 function pathToSegments(path: Point[]): Array<[Point, Point]> {
@@ -376,6 +615,28 @@ function pathToSegments(path: Point[]): Array<[Point, Point]> {
   }
 
   return segments;
+}
+
+function orthogonalCollisionSegments(path: Point[], includeHorizontalFirst: boolean): Array<[Point, Point]> {
+  const segments: Array<[Point, Point]> = [];
+
+  for (let i = 0; i < path.length - 1; i += 1) {
+    const start = path[i];
+    const end = path[i + 1];
+    if (start.x === end.x || start.y === end.y) {
+      segments.push([start, end]);
+      continue;
+    }
+
+    const verticalFirst = { x: start.x, y: end.y };
+    segments.push([start, verticalFirst], [verticalFirst, end]);
+    if (includeHorizontalFirst) {
+      const horizontalFirst = { x: end.x, y: start.y };
+      segments.push([start, horizontalFirst], [horizontalFirst, end]);
+    }
+  }
+
+  return dedupeSegments(segments);
 }
 
 function dedupeSegments(segments: Array<[Point, Point]>): Array<[Point, Point]> {
@@ -479,6 +740,109 @@ function validate(cells: Map<string, Cell>): Finding[] {
     .filter((cell) => isAwsLayoutGroup(cell, cells))
     .map((cell) => ({ cell, rect: absoluteRect(cell, cells) }))
     .filter((item): item is { cell: Cell; rect: Rect } => Boolean(item.rect));
+  const layoutEdges = [...cells.values()].filter((cell) => cell.edge && !isLegendCell(cell, cells));
+
+  for (const group of awsGroups) {
+    const visualParent = awsGroups
+      .filter((candidate) => candidate.cell.id !== group.cell.id)
+      .filter((candidate) => !hasAncestorRelation(group.cell, candidate.cell, cells))
+      .filter((candidate) => containsWithoutPadding(candidate.rect, group.rect))
+      .sort((a, b) => area(a.rect) - area(b.rect))[0];
+
+    if (visualParent) {
+      findings.push({
+        severity: "error",
+        code: "GROUP_VISUALLY_NESTED_WITHOUT_PARENT",
+        message: `${displayName(group.cell)} is visually inside ${displayName(visualParent.cell)} but is not its descendant in the draw.io XML.`,
+      });
+    }
+  }
+
+  for (let i = 0; i < awsGroups.length; i += 1) {
+    for (let j = i + 1; j < awsGroups.length; j += 1) {
+      const first = awsGroups[i];
+      const second = awsGroups[j];
+      if (hasAncestorRelation(first.cell, second.cell, cells) || containsWithoutPadding(first.rect, second.rect) || containsWithoutPadding(second.rect, first.rect)) {
+        continue;
+      }
+
+      if (intersects(first.rect, second.rect)) {
+        findings.push({
+          severity: "error",
+          code: "GROUP_OVERLAP",
+          message: `${displayName(first.cell)} overlaps ${displayName(second.cell)}. Make one group the parent of the other, or separate sibling groups.`,
+        });
+        continue;
+      }
+
+      const gap = minDistanceBetweenRects(first.rect, second.rect);
+      if (gap > 0 && gap < MIN_GROUP_GAP) {
+        findings.push({
+          severity: "error",
+          code: "GROUP_TOO_CLOSE",
+          message: `${displayName(first.cell)} is only ${Math.round(gap)}px from ${displayName(second.cell)}; keep at least ${MIN_GROUP_GAP}px between sibling groups.`,
+        });
+      }
+    }
+  }
+
+  for (const group of awsGroups) {
+    const contentRect = groupContentRect(group.rect);
+    for (const child of [...cells.values()].filter((cell) => cell.vertex && cell.parent === group.cell.id)) {
+      const childRect = isAwsServiceIcon(child) ? serviceRect(child, cells) : absoluteRect(child, cells);
+      if (!childRect) {
+        continue;
+      }
+
+      if (!containsWithoutPadding(contentRect, childRect)) {
+        findings.push({
+          severity: "error",
+          code: "CHILD_OUTSIDE_GROUP_CONTENT",
+          message: `${displayName(child)} is a child of ${displayName(group.cell)} but is outside its content area or overlaps the group title/padding.`,
+        });
+      }
+    }
+  }
+
+  for (const service of serviceIcons) {
+    const visualParent = awsGroups
+      .filter((group) => !isDescendantOf(service.cell, group.cell, cells))
+      .filter((group) => containsWithoutPadding(groupContentRect(group.rect), service.rect))
+      .sort((a, b) => area(a.rect) - area(b.rect))[0];
+
+    if (visualParent) {
+      findings.push({
+        severity: "error",
+        code: "SERVICE_VISUALLY_IN_GROUP_WITHOUT_PARENT",
+        message: `${displayName(service.cell)} is visually inside ${displayName(visualParent.cell)} but is not its descendant in the draw.io XML.`,
+      });
+    }
+  }
+
+  for (const group of awsGroups.filter((item) => isAwsRegionGroup(item.cell) || isAwsVpcGroup(item.cell) || isAwsAvailabilityZoneGroup(item.cell) || isAwsSubnetGroup(item.cell))) {
+    const requiredParent = isAwsSubnetGroup(group.cell)
+      ? awsGroups.find((candidate) => candidate.cell.id !== group.cell.id && isAwsAvailabilityZoneGroup(candidate.cell) && isDescendantOf(group.cell, candidate.cell, cells))
+      : isAwsAvailabilityZoneGroup(group.cell)
+        ? awsGroups.find((candidate) => candidate.cell.id !== group.cell.id && isAwsVpcGroup(candidate.cell) && isDescendantOf(group.cell, candidate.cell, cells))
+        : isAwsVpcGroup(group.cell)
+          ? awsGroups.find((candidate) => candidate.cell.id !== group.cell.id && isAwsRegionGroup(candidate.cell) && isDescendantOf(group.cell, candidate.cell, cells))
+          : awsGroups.find((candidate) => candidate.cell.id !== group.cell.id && isAwsCloudGroup(candidate.cell) && isDescendantOf(group.cell, candidate.cell, cells));
+
+    if (!requiredParent) {
+      const expected = isAwsSubnetGroup(group.cell)
+        ? "Availability Zone"
+        : isAwsAvailabilityZoneGroup(group.cell)
+          ? "VPC"
+          : isAwsVpcGroup(group.cell)
+            ? "Region"
+            : "AWS Cloud";
+      findings.push({
+        severity: "error",
+        code: "AWS_GROUP_PARENT_MISSING",
+        message: `${displayName(group.cell)} should be a descendant of an ${expected} group.`,
+      });
+    }
+  }
 
   for (let i = 0; i < serviceIcons.length; i += 1) {
     for (let j = i + 1; j < serviceIcons.length; j += 1) {
@@ -528,19 +892,29 @@ function validate(cells: Map<string, Cell>): Finding[] {
     }
   }
 
-  for (const edge of [...cells.values()].filter((cell) => cell.edge)) {
+  for (const edge of layoutEdges) {
+    if (edge.points.length > MAX_EDGE_WAYPOINTS) {
+      findings.push({
+        severity: "error",
+        code: "EXCESSIVE_EDGE_WAYPOINTS",
+        message: `${edge.id} has ${edge.points.length} manual waypoints; use placement or at most ${MAX_EDGE_WAYPOINTS} waypoint to avoid jagged lines.`,
+      });
+    }
+
     const segments = edgeCollisionSegments(edge, cells);
     if (segments.length === 0) {
       continue;
     }
 
     for (const service of serviceIcons) {
-      if (service.cell.id === edge.source || service.cell.id === edge.target) {
+      const iconCollisionRect = iconRect(service.cell, cells);
+      if (!iconCollisionRect) {
         continue;
       }
+      const collisionRect = insetRect(iconCollisionRect, EDGE_ICON_TOUCH_TOLERANCE);
 
       for (const segment of segments) {
-        if (segmentIntersectsRect(segment[0], segment[1], service.rect)) {
+        if (segmentIntersectsRect(segment[0], segment[1], collisionRect)) {
           findings.push({
             severity: "error",
             code: "EDGE_CROSSES_SERVICE_ICON",
@@ -552,10 +926,18 @@ function validate(cells: Map<string, Cell>): Finding[] {
     }
   }
 
-  const edges = [...cells.values()].filter((cell) => cell.edge);
+  const edges = layoutEdges;
   for (let i = 0; i < edges.length; i += 1) {
+    if (isPlainLine(edges[i])) {
+      continue;
+    }
+
     const firstSegments = edgeSegments(edges[i], cells);
     for (let j = i + 1; j < edges.length; j += 1) {
+      if (isPlainLine(edges[j])) {
+        continue;
+      }
+
       const secondSegments = edgeSegments(edges[j], cells);
       let pairHasOverlap = false;
 
@@ -589,10 +971,15 @@ function printUsage(): void {
 
 Checks:
   - AWS service icons do not overlap each other
+  - AWS groups have explicit parent-child nesting instead of visual-only containment
+  - Child cells stay inside group content areas and below group title space
+  - Sibling AWS groups do not overlap or sit too close together
   - AWS service icons do not overlap AWS Group borders
   - AWS service icons stay inside AWS Cloud with 30px padding
+  - Layout edges avoid excessive manual waypoints
   - Edges do not cross AWS service icon label areas
-  - Edges do not overlap each other on the same route
+  - Arrow edges do not overlap each other on the same route
+  - Plain lines may overlap other lines, but still must not cross service icon label areas
 
 Input must be an uncompressed draw.io XML file containing mxGraphModel.`);
 }
