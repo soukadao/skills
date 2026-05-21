@@ -50,6 +50,8 @@ const EDGE_ICON_TOUCH_TOLERANCE = 1;
 const MIN_GROUP_GAP = 30;
 const GROUP_HEADER_HEIGHT = 50;
 const MAX_EDGE_WAYPOINTS = 1;
+const INTERNET_GATEWAY_TOP_CENTER_X_TOLERANCE = 24;
+const INTERNET_GATEWAY_TOP_CENTER_Y_TOLERANCE = 8;
 
 function decodeXml(value: string): string {
   return value
@@ -209,6 +211,10 @@ function isAwsVpcGroup(cell: Cell): boolean {
   return cell.vertex && cell.style.includes("grIcon=mxgraph.aws4.group_vpc");
 }
 
+function isAwsInternetGatewayIcon(cell: Cell): boolean {
+  return isAwsServiceIcon(cell) && styleValue(cell.style, "shape") === "mxgraph.aws4.internet_gateway";
+}
+
 function isAwsAvailabilityZoneGroup(cell: Cell): boolean {
   return cell.vertex && normalizedValue(cell).includes("availability zone");
 }
@@ -273,6 +279,40 @@ function parentChain(cell: Cell, cells: Map<string, Cell>): Cell[] {
 
 function isDescendantOf(cell: Cell, ancestor: Cell, cells: Map<string, Cell>): boolean {
   return parentChain(cell, cells).some((parent) => parent.id === ancestor.id);
+}
+
+function expectedVpcForInternetGateway(
+  gateway: { cell: Cell; rect: Rect },
+  vpcGroups: Array<{ cell: Cell; rect: Rect }>,
+  cells: Map<string, Cell>,
+): { cell: Cell; rect: Rect } | undefined {
+  const descendantVpc = vpcGroups
+    .filter((vpc) => isDescendantOf(gateway.cell, vpc.cell, cells))
+    .sort((a, b) => area(a.rect) - area(b.rect))[0];
+  if (descendantVpc) {
+    return descendantVpc;
+  }
+
+  if (vpcGroups.length === 1) {
+    return vpcGroups[0];
+  }
+
+  const gatewayCenter = center(gateway.rect);
+  return vpcGroups
+    .map((vpc) => ({
+      vpc,
+      distance: distanceSquared(gatewayCenter, { x: vpc.rect.x + vpc.rect.width / 2, y: vpc.rect.y }),
+    }))
+    .sort((a, b) => a.distance - b.distance)[0]?.vpc;
+}
+
+function isInternetGatewayOnVpcTopCenter(gatewayRect: Rect, vpcRect: Rect): boolean {
+  const gatewayCenter = center(gatewayRect);
+  const expectedCenterX = vpcRect.x + vpcRect.width / 2;
+  return (
+    Math.abs(gatewayCenter.x - expectedCenterX) <= INTERNET_GATEWAY_TOP_CENTER_X_TOLERANCE &&
+    Math.abs(gatewayCenter.y - vpcRect.y) <= INTERNET_GATEWAY_TOP_CENTER_Y_TOLERANCE
+  );
 }
 
 function hasAncestorRelation(first: Cell, second: Cell, cells: Map<string, Cell>): boolean {
@@ -741,6 +781,14 @@ function validate(cells: Map<string, Cell>): Finding[] {
     .map((cell) => ({ cell, rect: absoluteRect(cell, cells) }))
     .filter((item): item is { cell: Cell; rect: Rect } => Boolean(item.rect));
   const layoutEdges = [...cells.values()].filter((cell) => cell.edge && !isLegendCell(cell, cells));
+  const vpcGroups = awsGroups.filter((item) => isAwsVpcGroup(item.cell));
+  const internetGateways = serviceIcons
+    .filter((item) => isAwsInternetGatewayIcon(item.cell))
+    .map((item) => {
+      const rect = iconRect(item.cell, cells);
+      return rect ? { cell: item.cell, rect } : undefined;
+    })
+    .filter((item): item is { cell: Cell; rect: Rect } => Boolean(item));
 
   for (const group of awsGroups) {
     const visualParent = awsGroups
@@ -794,11 +842,35 @@ function validate(cells: Map<string, Cell>): Finding[] {
         continue;
       }
 
+      if (isAwsVpcGroup(group.cell) && isAwsInternetGatewayIcon(child)) {
+        continue;
+      }
+
       if (!containsWithoutPadding(contentRect, childRect)) {
         findings.push({
           severity: "error",
           code: "CHILD_OUTSIDE_GROUP_CONTENT",
           message: `${displayName(child)} is a child of ${displayName(group.cell)} but is outside its content area or overlaps the group title/padding.`,
+        });
+      }
+    }
+  }
+
+  if (vpcGroups.length > 0) {
+    for (const gateway of internetGateways) {
+      const expectedVpc = expectedVpcForInternetGateway(gateway, vpcGroups, cells);
+      if (!expectedVpc) {
+        continue;
+      }
+
+      if (!isInternetGatewayOnVpcTopCenter(gateway.rect, expectedVpc.rect)) {
+        const gatewayCenter = center(gateway.rect);
+        findings.push({
+          severity: "error",
+          code: "INTERNET_GATEWAY_NOT_ON_VPC_TOP_CENTER",
+          message: `${displayName(gateway.cell)} should be centered on the top border of ${displayName(expectedVpc.cell)}. Expected center near (${Math.round(
+            expectedVpc.rect.x + expectedVpc.rect.width / 2,
+          )}, ${Math.round(expectedVpc.rect.y)}), but found (${Math.round(gatewayCenter.x)}, ${Math.round(gatewayCenter.y)}).`,
         });
       }
     }
@@ -879,6 +951,14 @@ function validate(cells: Map<string, Cell>): Finding[] {
   for (const service of serviceIcons) {
     for (const group of awsGroups) {
       if (service.cell.id === group.cell.id || !intersects(service.rect, group.rect)) {
+        continue;
+      }
+
+      if (
+        isAwsInternetGatewayIcon(service.cell) &&
+        isAwsVpcGroup(group.cell) &&
+        isInternetGatewayOnVpcTopCenter(iconRect(service.cell, cells) ?? service.rect, group.rect)
+      ) {
         continue;
       }
 
