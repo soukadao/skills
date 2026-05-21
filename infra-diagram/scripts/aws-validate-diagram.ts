@@ -965,30 +965,12 @@ function validate(cells: Map<string, Cell>): Finding[] {
   return findings;
 }
 
-function printUsage(): void {
-  console.log(`Usage:
-  tsx scripts/aws-validate-diagram.ts <diagram.xml>
-
-Checks:
-  - AWS service icons do not overlap each other
-  - AWS groups have explicit parent-child nesting instead of visual-only containment
-  - Child cells stay inside group content areas and below group title space
-  - Sibling AWS groups do not overlap or sit too close together
-  - AWS service icons do not overlap AWS Group borders
-  - AWS service icons stay inside AWS Cloud with 30px padding
-  - Layout edges avoid excessive manual waypoints
-  - Edges do not cross AWS service icon label areas
-  - Arrow edges do not overlap each other on the same route
-  - Plain lines may overlap other lines, but still must not cross service icon label areas
-
-Input must be an uncompressed draw.io XML file containing mxGraphModel.`);
-}
-
 function runCli(args: string[]): void {
   const [filePath] = args;
 
-  if (!filePath || filePath === "help" || filePath === "--help" || filePath === "-h") {
-    printUsage();
+  if (!filePath) {
+    console.error("Missing diagram XML path.");
+    process.exitCode = 1;
     return;
   }
 
@@ -1012,9 +994,8 @@ function runCli(args: string[]): void {
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
     runCli(process.argv.slice(2));
-  } catch (error) {
+} catch (error) {
     console.error(error instanceof Error ? error.message : error);
-    printUsage();
     process.exitCode = 1;
   }
 }
