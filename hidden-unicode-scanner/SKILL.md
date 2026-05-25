@@ -3,10 +3,6 @@ name: hidden-unicode-scanner
 description: ソースコードやテキストファイルに含まれる不可視・制御・疑わしいUnicode文字を検出する。Trojan Source、GlassWorm、ゼロ幅文字、Unicode tag、variation selectorの検査が必要な時に使用する
 ---
 
-# hidden-unicode-scanner
-
-不可視Unicode文字を検出するためのCLI `hidden_unicode_scanner.py` を使うSkill。
-
 ## 実行方法
 
 ```bash
