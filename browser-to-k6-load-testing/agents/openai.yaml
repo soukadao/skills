@@ -1,0 +1,4 @@
+interface:
+  display_name: "Browser to k6 Load Testing"
+  short_description: "Create k6 tests from browser scenarios"
+  default_prompt: "Use $browser-to-k6-load-testing to capture a browser scenario and turn it into a k6 load test."
