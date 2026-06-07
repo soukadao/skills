@@ -1,0 +1,4 @@
+interface:
+  display_name: "Task Decomposer"
+  short_description: "Break complex work into small, low-dependency execution tasks."
+  default_prompt: "Break this task into small, low-dependency steps that each take about 1 to 60 minutes, with clear success criteria and validation."
