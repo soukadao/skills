@@ -43,6 +43,4 @@ git commit -m ": some message"    # fails(reason: prefix empty)
 git commit -m "fix:"              # fails(reason: message empty)
 git commit -m "fix: SomeMessage"  # fails(reason: message is lower case)
 git commit -m "fix: some message" # passes
-git commit -m "feat: アップロード対象にPDFを追加する" # passes
-git commit -m "feat: add pdf to supported upload formats" # passes
 ```
