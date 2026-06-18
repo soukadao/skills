@@ -5,7 +5,12 @@ description: Use when preparing Git commits, staging related changes in focused 
 
 # Code Commit
 
-Stage related files in small chunks after completing a task
+## Commit Scope
+
+- Group changes made for the same reason or intent into one commit.
+- Do not split commits based only on file count or implementation steps.
+- Separate changes made for different reasons or intents into different commits.
+- Keep each commit independently revertible.
 
 ## Commit Message
 
@@ -23,6 +28,10 @@ Stage related files in small chunks after completing a task
 - style
 - test
 
+### Message
+
+- Phrase the message as an action the commit performs, using a concrete verb such as add, change, remove, or their equivalent.
+
 ### Message Example
 
 ```bash
@@ -34,4 +43,6 @@ git commit -m ": some message"    # fails(reason: prefix empty)
 git commit -m "fix:"              # fails(reason: message empty)
 git commit -m "fix: SomeMessage"  # fails(reason: message is lower case)
 git commit -m "fix: some message" # passes
+git commit -m "feat: アップロード対象にPDFを追加する" # passes
+git commit -m "feat: add pdf to supported upload formats" # passes
 ```
