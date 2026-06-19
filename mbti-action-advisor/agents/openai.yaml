@@ -1,0 +1,4 @@
+interface:
+  display_name: "MBTI Action Advisor"
+  short_description: "MBTIから日常行動と環境選びを支援"
+  default_prompt: "Use $mbti-action-advisor to suggest practical daily actions, habits, and suitable environments from my MBTI type."
