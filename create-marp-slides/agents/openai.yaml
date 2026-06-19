@@ -1,0 +1,4 @@
+interface:
+  display_name: "Marp Slides"
+  short_description: "Marpデッキの設計、作成、書き出し、視覚検証を支援"
+  default_prompt: "Use $create-marp-slides to turn my source material into a polished Marp slide deck."
