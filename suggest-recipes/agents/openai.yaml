@@ -1,0 +1,4 @@
+interface:
+  display_name: "食材からレシピ提案"
+  short_description: "使いたい食材から料理、レシピ、完成イメージを提案します"
+  default_prompt: "$suggest-recipes を使って、手元の食材からおすすめ料理と作り方、完成イメージを提案してください。"
