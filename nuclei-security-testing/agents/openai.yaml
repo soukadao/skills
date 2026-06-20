@@ -1,0 +1,4 @@
+interface:
+  display_name: "Nuclei Security Testing"
+  short_description: "Generate and run targeted Nuclei security tests"
+  default_prompt: "Use $nuclei-security-testing to create and execute a targeted Nuclei security test for this application."
