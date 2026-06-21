@@ -1,0 +1,4 @@
+interface:
+  display_name: "Derive Ideas from Essence"
+  short_description: "具体と抽象を往復し、問題の本質から新しいアイデアを導く"
+  default_prompt: "Use $derive-ideas-from-essence to uncover the essential mechanism behind this problem and create original ideas from it."
