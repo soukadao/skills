@@ -1,0 +1,4 @@
+interface:
+  display_name: "Test Commit Revert"
+  short_description: "テスト結果に応じて小さな変更をコミットまたは破棄する"
+  default_prompt: "Use $test-commit-revert to implement this change through tiny tested increments."
