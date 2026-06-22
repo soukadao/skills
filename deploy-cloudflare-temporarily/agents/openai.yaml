@@ -1,0 +1,4 @@
+interface:
+  display_name: "Temporary Cloudflare Deploy"
+  short_description: "Deploy and verify temporary Cloudflare Workers"
+  default_prompt: "Use $deploy-cloudflare-temporarily to deploy this Worker temporarily and verify it."
