@@ -1,0 +1,4 @@
+interface:
+  display_name: "Test Scenario Design"
+  short_description: "Design scenarios and Playwright HAR specs"
+  default_prompt: "Use $test-scenario-design to turn this workflow into a scenario and Playwright HAR recording spec."

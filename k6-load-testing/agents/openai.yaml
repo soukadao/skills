@@ -1,0 +1,4 @@
+interface:
+  display_name: "k6 Load Testing"
+  short_description: "Run and tune k6 load tests"
+  default_prompt: "Use $k6-load-testing to run this k6 script safely and summarize the load test results."

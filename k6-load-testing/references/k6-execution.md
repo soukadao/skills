@@ -61,6 +61,47 @@ export default function () {
 - Use `ramping-arrival-rate` for traffic ramps where arrival rate matters more than user count.
 - Keep spike tests short and explicitly bounded.
 
+## Spike Profiles And Delivered Traffic
+
+For event-like traffic spikes, prefer an arrival-rate profile when the requirement comes from observed requests per minute rather than a target number of concurrent users. This works with OSS k6 and local execution:
+
+```javascript
+export const options = {
+  scenarios: {
+    spike: {
+      executor: 'ramping-arrival-rate',
+      startRate: 0,
+      timeUnit: '1m',
+      preAllocatedVUs: 50,
+      stages: [
+        { duration: '10s', target: 100 },
+        { duration: '10s', target: 200 },
+        { duration: '50s', target: 200 },
+        { duration: '10s', target: 0 },
+      ],
+    },
+  },
+};
+```
+
+Estimate delivered backend load before running:
+
+```text
+expected backend requests per minute =
+  target iterations per minute * first-party backend requests per iteration
+```
+
+Then verify with target-side evidence, not only k6's own iteration count. Prefer application access logs, reverse-proxy logs, load balancer response counts, or server-side request counters closest to the application work. Treat CDN request count as noisy when static assets or cache behavior are involved, and treat sampled tracing/APM request counts as approximate. If delivered traffic is lower than expected, check edge/auth redirects, filtered endpoints, failed checks, and whether the generated script still calls the intended first-party APIs.
+
+For authenticated staging targets, start with a simple endpoint such as `/health` and disable redirects to confirm the edge/auth behavior before running the full scenario:
+
+```javascript
+http.get(`${BASE_URL}/health`, {
+  redirects: 0,
+  tags: { name: 'GET /health' },
+});
+```
+
 ## Thresholds
 
 Good API defaults:
@@ -94,6 +135,31 @@ Staging load test:
 
 ```bash
 BASE_URL=https://staging.example.com K6_PROFILE=load k6 run tests/perf/api.js
+```
+
+## Environment Variable Names
+
+k6 treats several `K6_*` environment variables as runtime configuration. Avoid using names such as `K6_VUS`, `K6_ITERATIONS`, `K6_DURATION`, or `K6_STAGES` for script-level knobs because they can override `options` and produce warnings or unexpected scenarios.
+
+Use script-specific names instead:
+
+```javascript
+export const options = {
+  scenarios: {
+    smoke: {
+      executor: 'shared-iterations',
+      vus: Number(__ENV.PERF_VUS || 1),
+      iterations: Number(__ENV.PERF_ITERATIONS || 1),
+      maxDuration: __ENV.PERF_MAX_DURATION || '30s',
+    },
+  },
+};
+```
+
+Command:
+
+```bash
+BASE_URL=http://localhost:3000 PERF_VUS=1 PERF_ITERATIONS=1 k6 run tests/perf/api.js
 ```
 
 ## Custom Summary
