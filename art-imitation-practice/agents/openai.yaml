@@ -1,0 +1,4 @@
+interface:
+  display_name: "Art Imitation Practice"
+  short_description: "Create drawing copy prompts and references"
+  default_prompt: "Use $art-imitation-practice to create a drawing-copy practice prompt and reference image."

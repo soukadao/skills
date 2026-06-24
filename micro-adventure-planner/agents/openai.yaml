@@ -1,0 +1,4 @@
+interface:
+  display_name: "Micro Adventure Planner"
+  short_description: "Plan tiny refreshing everyday adventures"
+  default_prompt: "Use $micro-adventure-planner to plan a small refreshing adventure for today."
