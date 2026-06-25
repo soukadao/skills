@@ -1,0 +1,4 @@
+interface:
+  display_name: "Glossary Builder"
+  short_description: "Create practical business glossaries"
+  default_prompt: "Use $glossary-builder to create a business glossary for this domain."
