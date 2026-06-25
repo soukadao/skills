@@ -1,0 +1,4 @@
+interface:
+  display_name: "Frontend QA Checker"
+  short_description: "Check frontend UI quality across states and viewports"
+  default_prompt: "Use $frontend-qa-checker to verify this frontend screen across desktop and mobile viewports and report visual, responsive, and interaction issues."

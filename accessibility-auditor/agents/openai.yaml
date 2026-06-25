@@ -1,0 +1,4 @@
+interface:
+  display_name: "Accessibility Auditor"
+  short_description: "Audit web accessibility with WCAG-EM guidance"
+  default_prompt: "Use $accessibility-auditor to audit this web page or app flow for accessibility issues and produce a concise findings report."
