@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Build Assistant"
+  short_description: "Capture layout inspection screenshots"
+  default_prompt: "Use $ui-build-assistant to capture Playwright screenshots with layout outlines for this page."
