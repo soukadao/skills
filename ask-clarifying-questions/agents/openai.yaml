@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ask Clarifying Questions"
+  short_description: "Ask concise questions before risky assumptions"
+  default_prompt: "Use $ask-clarifying-questions to identify blocking ambiguities before taking action."
