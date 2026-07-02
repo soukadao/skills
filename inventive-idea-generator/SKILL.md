@@ -5,7 +5,7 @@ description: Generate, expand, and evaluate innovative ideas for products, servi
 
 # Inventive Idea Generator
 
-Create ideas that are both non-obvious and usable. Prefer structured divergence followed by explicit convergence over a single brainstorm list.
+Create ideas that are both non-obvious and usable. Prefer structured divergence followed by explicit convergence over a single brainstorm list. When a problem is vague or recurring, first derive a mechanism-level hypothesis, then generate ideas from the lever that mechanism reveals.
 
 ## Workflow
 
@@ -21,11 +21,21 @@ If the actor, outcome, or constraints are unclear, proceed with labeled assumpti
 
 - User facts: goals, users, pains, assets, constraints, unfair advantages.
 - Frictions: expensive, slow, risky, boring, confusing, wasteful, inaccessible, delayed, fragmented.
+- Concrete cases: two to five examples of when the problem appears, plus a contrast where it is absent or weaker.
 - Optional external signals: trends, papers, patents, competitor moves, regulations, adjacent domains.
 
 For external research or API/library selection, read `references/tooling.md`.
 
-3. Generate with at least four lenses:
+3. If the challenge needs reframing, derive the essence before ideating:
+
+```text
+When [condition], [mechanism] produces [target outcome] because [reason].
+Because [mechanism], change [lever] from [current state] to [new state].
+```
+
+Select a mechanism only when it explains the cases, describes a cause rather than renaming the symptom, preserves the user's target, and reveals something controllable. Keep a credible alternative when the evidence does not distinguish it.
+
+4. Generate with at least four lenses:
 
 - Inversion: make the current failure impossible, unnecessary, or self-correcting.
 - Constraint removal: remove one scarce resource, step, permission, skill, device, or dependency.
@@ -36,7 +46,7 @@ For external research or API/library selection, read `references/tooling.md`.
 - Business model shift: change who pays, when value is captured, risk sharing, ownership, or distribution.
 - Ritual/environment shift: change timing, defaults, context, social proof, or physical/digital surroundings.
 
-4. Shape raw ideas into concepts:
+5. Shape raw ideas into concepts:
 
 ```text
 Name:
@@ -48,10 +58,10 @@ Why it is non-obvious:
 Smallest test:
 ```
 
-5. Evaluate without killing novelty too early:
+6. Evaluate without killing novelty too early:
 
 - Novelty: Is it more than a feature tweak or obvious automation?
-- Mechanism fit: Does it attack the actual bottleneck, contradiction, or unmet desire?
+- Mechanism fit: Does it attack the actual bottleneck, contradiction, essence, or unmet desire?
 - Feasibility path: Is there a small version that can be tried soon?
 - Defensibility: Does it create data, network, workflow, brand, switching, or distribution advantage?
 - Risk: What must be true for it to work, and what could disprove it?
