@@ -1,0 +1,4 @@
+interface:
+  display_name: "Inventive Idea Generator"
+  short_description: "革新的な発想を広げ評価し検証計画まで実務向けに作成する"
+  default_prompt: "Use $inventive-idea-generator to generate and rank innovative product or business ideas from my problem context."
