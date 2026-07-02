@@ -1,0 +1,4 @@
+interface:
+  display_name: "Benchmark Runner"
+  short_description: "Design, run, compare, and report benchmarks"
+  default_prompt: "Use $benchmark-runner to design and run a reproducible benchmark for this change."

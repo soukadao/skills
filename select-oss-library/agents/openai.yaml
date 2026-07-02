@@ -1,0 +1,4 @@
+interface:
+  display_name: "Select OSS Library"
+  short_description: "Evaluate OSS libraries with clear tradeoffs"
+  default_prompt: "Use $select-oss-library to compare candidate OSS libraries for this project and recommend one."
