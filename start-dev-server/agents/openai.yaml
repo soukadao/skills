@@ -1,0 +1,4 @@
+interface:
+  display_name: "Start Dev Server"
+  short_description: "Run dev servers in tmux with share modes"
+  default_prompt: "Use $start-dev-server to start this app in tmux and choose local, LAN, or Cloudflare Tunnel access."
