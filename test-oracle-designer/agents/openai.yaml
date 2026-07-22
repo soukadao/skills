@@ -1,0 +1,4 @@
+interface:
+  display_name: "Test Oracle Designer"
+  short_description: "Design reliable pass/fail criteria for hard-to-test behavior"
+  default_prompt: "Use $test-oracle-designer to define reliable test oracles, expected outcomes, and evaluation criteria for this behavior."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Critical Thinking Reviewer"
+  short_description: "Assumption, evidence, and risk review"
+  default_prompt: "Use $critical-thinking-reviewer to challenge this proposal and identify weak assumptions, missing evidence, and safer alternatives."

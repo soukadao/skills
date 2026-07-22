@@ -1,0 +1,4 @@
+interface:
+  display_name: "Local Dev Troubleshooter"
+  short_description: "Diagnose local development failures"
+  default_prompt: "Use $local-dev-troubleshooter to diagnose this local development failure and propose the next checks."

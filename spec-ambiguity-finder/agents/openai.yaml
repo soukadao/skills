@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Ambiguity Finder"
+  short_description: "Find unclear requirements before implementation"
+  default_prompt: "Use $spec-ambiguity-finder to review this specification for ambiguity and missing acceptance criteria."
