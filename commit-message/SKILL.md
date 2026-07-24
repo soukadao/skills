@@ -31,6 +31,7 @@ description: Use when preparing Git commits, staging related changes in focused 
 ### Message
 
 - Phrase the message as an action the commit performs, using a concrete verb such as add, change, remove, or their equivalent.
+- Write the message text in the same language as the conversation unless the user specifies otherwise. Keep the prefix in the required lowercase English form.
 
 ### Message Example
 
