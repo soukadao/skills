@@ -1,6 +1,6 @@
 ---
 name: discover-bounded-context
-description: Interactive domain-analysis workflow for discovering Bounded Contexts from requirements, business documents, user stories, interviews, code, schemas, and event flows. Extract context-specific language, actors, commands, events, states, rules, ownership, and integrations; detect missing or conflicting context; ask one high-impact question at a time with a recommended answer; and produce traceable Context Cards, a glossary, a Context Map, assumptions, and unresolved decisions. Use when modeling a domain from incomplete documentation, clarifying requirements while designing, finding Bounded Context boundaries, or stress-testing a DDD/domain model.
+description: Fact-based interactive domain-analysis workflow for discovering Bounded Contexts from requirements, business documents, user stories, interviews, code, schemas, and event flows. Extract context-specific language, actors, commands, events, states, rules, ownership, and integrations; identify unsupported or conflicting claims; ask one unresolved question at a time; and produce traceable Context Cards, a glossary, a Context Map, source references, and open decisions. Use when modeling a domain from incomplete documentation, clarifying requirements while designing, finding Bounded Context boundaries, or stress-testing a DDD/domain model.
 ---
 
 # Discover Bounded Context
@@ -15,23 +15,24 @@ Turn incomplete domain material into a traceable, reviewable set of:
 - actors, roles, entities, value objects, commands, events, states, and rules;
 - candidate Bounded Contexts and their responsibilities;
 - relationships, translations, events, and dependencies between contexts;
-- explicit assumptions, confidence levels, evidence, and open decisions.
+- explicit facts, source references, assumptions, unknowns, and open decisions.
 
-Do not treat a Bounded Context as a synonym for a microservice, database, team, or deployment unit. Establish the language and model boundary first; discuss physical architecture only after the domain boundary is sufficiently understood.
+Do not treat a Bounded Context as a synonym for a microservice, database, team, or deployment unit. Establish the language and model boundary first; discuss physical architecture only after the source facts and unresolved decisions for the requested scope are recorded.
 
 ## Operating Rules
 
 - Ask **one question at a time**. Do not present a questionnaire unless the user explicitly requests a batch.
-- Select the highest-impact unresolved question: prioritize ambiguity that could change the target, actor authority, lifecycle, rule owner, or Context boundary.
-- State a recommended answer for every question, explain the evidence, and describe the consequence of choosing it. Let the user provide a different answer.
+- Select the next unresolved question using the fixed order in [question-catalog.md](references/question-catalog.md): target and meaning, actor and authority, trigger and timing, state and lifecycle, rule owner and consistency, result and event, side effects and integrations, vocabulary, ownership, and physical architecture only when requested.
+- State a source-supported interpretation only when an explicit source supports one interpretation. Otherwise ask the question, list the alternatives, and do not provide a preferred answer. Never present an interpretation as an agreed business rule without a source or user decision.
 - If the answer can be found in supplied files, code, schemas, diagrams, or document context, inspect those sources before asking the user.
 - Separate `Fact`, `Inferred`, `Assumption`, and `Unknown`. Keep competing interpretations until evidence or a decision resolves them.
+- Put only `Fact` items and explicit user decisions in the settled model. Put `Inferred` and `Assumption` items under candidate interpretations, and put `Unknown` items under open questions.
 - Preserve source traceability. Link every important term, rule, event, and boundary claim to a document section, file path, line, interview answer, or explicit user decision when available.
 - Ask for a concrete decision, not approval of the analysis. Do not ask “Does this look right?” when the actual missing decision can be stated directly.
 - Use the user's language for domain terms. Introduce English names only when needed for code or integration mapping.
 - Do not convert every noun into a class. Model the role, identity, lifecycle, rules, and ownership of each concept.
-- Prefer a small number of cohesive contexts. Split only when language, purpose, rules, lifecycle, ownership, consistency, or change reasons materially differ.
-- Keep unresolved low-impact questions visible in the output instead of blocking progress unnecessarily.
+- Propose a Context boundary only when at least one documented difference exists in vocabulary, rules, lifecycle, transaction scope, ownership, change trigger, or integration contract.
+- Keep every unresolved question visible. Do not convert an unsupported interpretation into a fact or an agreed boundary.
 
 ## Workflow
 
@@ -45,14 +46,16 @@ Identify:
 - evidence sources and their authority;
 - constraints such as existing teams, systems, compliance, or migration requirements.
 
-If the request is underspecified but exploration is safe, state a narrow assumption and begin. Ask before proceeding only when the missing scope would produce materially different models.
+If the request is underspecified but exploration is safe, state the missing scope and a reversible assumption before beginning. Ask before proceeding when the missing scope changes the source statements or requested artifact.
 
 ### 2. Normalize the Source into Context Units
+
+Before analysis, assign stable source IDs to paragraphs or bullets, such as `R-001`, `R-002`, and `R-003`. Preserve explicit section and bullet identifiers when they exist. Cite these IDs in every extracted fact, rule, event, and boundary claim. If no stable ID can be created, cite an exact quote instead of inventing a requirement number.
 
 Break prose, scenarios, and event flows into atomic statements. Capture each statement using this shape:
 
 ```text
-Source:
+Source ID / quote:
 Actor / role:
 Trigger:
 Intent / command:
@@ -95,19 +98,20 @@ For each unit, mark missing or conflicting slots. Always check:
 - **Vocabulary**: does the same term have different meanings in different areas?
 - **Source of truth**: which document, system, or role owns the definition?
 
-Classify each gap as `Blocker`, `High`, `Medium`, or `Low`. Ask about Blocker and High gaps first.
+Queue unresolved slots using the fixed question order. Do not assign subjective severity or confidence labels. Keep the source ID, missing slot, candidate interpretations, and next question in the gap record.
 
 ### 4. Interview One Question at a Time
 
-Maintain a decision queue. For the highest-priority item, present:
+Maintain a decision queue. For the next unresolved item in the fixed question order, present:
 
 ```markdown
 ### Question
 [One concrete question]
 
-**Recommended answer:** [Best current interpretation]
+**Source-supported interpretation:** [State only when an explicit source supports one interpretation]
 **Evidence:** [Source or reasoning]
-**Why it matters:** [Model or boundary consequence]
+**Alternatives requiring a decision:** [Other interpretations]
+**Impact:** [Specific model field, state, rule, or relationship affected]
 ```
 
 After the user answers:
@@ -115,7 +119,7 @@ After the user answers:
 1. Record the answer as a decision with its source and date or conversation turn.
 2. Promote or revise the affected facts, terms, rules, and context candidates.
 3. Remove resolved questions and recompute dependent questions.
-4. Show only the next highest-impact question unless the user asks for a summary.
+4. Show only the next unresolved question in the fixed order unless the user asks for a summary.
 
 For a sentence such as `ユーザーがイベントの参加をキャンセルする`, do not immediately choose a model. First distinguish at least:
 
@@ -123,37 +127,37 @@ For a sentence such as `ユーザーがイベントの参加をキャンセル�
 - organizer cancelling the event;
 - administrator cancelling someone else's registration.
 
-The recommended first question should identify the target and authority because each interpretation can lead to a different Context and lifecycle.
+The first question should identify the target and authority because each interpretation can lead to a different Context and lifecycle.
 
 ### 5. Form Context Candidates
 
-Cluster concepts by the model that can use one consistent language and rules. For each candidate, evaluate:
+Cluster concepts by the model that uses one consistent language and rules. Record source-backed evidence for each candidate using:
 
-1. **Purpose**: what business outcome does it optimize or protect?
+1. **Purpose**: what named business outcome or responsibility is stated in the source?
 2. **Language**: are key terms unambiguous within the candidate?
 3. **Rules**: who owns the decisions and invariants?
 4. **Lifecycle**: do the important states and transitions belong together?
 5. **Consistency**: what must change atomically?
 6. **Ownership**: which role, team, or business capability is accountable?
-7. **Change reason**: would the same business change affect all concepts?
+7. **Change trigger**: which named requirement, event, or policy changes each concept?
 8. **Integration**: where is translation or asynchronous communication required?
 
-Strong split signals:
+Documented boundary evidence:
 
 - the same word has different definitions or attributes;
 - different actors use the same term for different purposes;
 - separate lifecycles or policies govern the concepts;
-- the concepts change for different business reasons;
+- the concepts are changed by different named requirements or business events;
 - a translation, event, or reconciliation step is already present;
 - one area must not directly own another area's decisions.
 
-Strong merge signals:
+Documented evidence for keeping concepts together:
 
 - the same terms, rules, and lifecycle are used;
 - concepts must remain consistent in one business transaction;
-- splitting would create constant synchronous coordination without a meaningful model boundary.
+- the same stated rule, lifecycle, and transaction must be applied atomically.
 
-Treat organizational or system boundaries as evidence, not proof. A team or database boundary can be a useful clue but cannot replace semantic and business evidence.
+Treat organizational or system boundaries as source facts only. Do not use a team or database boundary as the sole basis for a Context boundary.
 
 ### 6. Build the Context Map
 
@@ -174,7 +178,7 @@ Prefer domain events for facts that have occurred. Do not force shared entities 
 
 ### 7. Produce and Maintain the Artifacts
 
-Keep these artifacts synchronized after every meaningful answer.
+Keep these artifacts synchronized after every user answer that resolves or adds a fact.
 
 #### Context Card
 
@@ -193,14 +197,13 @@ Keep these artifacts synchronized after every meaningful answer.
 - Upstream / downstream contexts:
 - Translation mechanism:
 - Evidence:
-- Confidence: High | Medium | Low
 - Open questions:
 ```
 
 #### Term Entry
 
 ```markdown
-| Term | Context | Meaning | Includes | Excludes | Aliases | Source | Status |
+| Term | Context | Meaning | Includes | Excludes | Aliases | Source | Evidence status |
 |---|---|---|---|---|---|---|---|
 ```
 
@@ -213,11 +216,18 @@ Keep these artifacts synchronized after every meaningful answer.
 
 #### Context Map
 
-Use a table for traceability and a compact diagram when helpful:
+Use a table for traceability. Add a diagram only when the user requests it or when it represents relationships already supported by the table:
 
 ```markdown
-| Upstream | Downstream | Contract / event | Translation | Consistency | Evidence |
-|---|---|---|---|---|---|
+| Upstream | Downstream | Contract / event | Translation | Consistency | Evidence | Evidence status |
+|---|---|---|---|---|---|---|
+```
+
+#### Context Candidate
+
+```markdown
+| Candidate | Source IDs / quotes | Stated responsibility | Evidence status | Open questions |
+|---|---|---|---|---|
 ```
 
 ### 8. Validate Before Closing
@@ -226,25 +236,25 @@ Stop the interview when:
 
 - every in-scope scenario has an actor, trigger, action, result, and failure path;
 - key terms have a meaning within a named Context;
-- high-impact rules have an owner;
+- every stated rule has an owner or is listed as unknown;
 - important state transitions are explicit;
-- each Context has a coherent purpose and language;
+- each Context has a named purpose, listed terms, and at least one command, event, state, or rule;
 - Context relationships have contracts, timing, and translation recorded;
-- no high-impact unknown remains hidden as an assumption;
-- remaining low-impact questions are listed for later confirmation.
+- every unknown is listed as an open question or an explicitly accepted assumption;
+- remaining unresolved questions are listed for later confirmation.
 
 Replay the original scenarios against the proposed map. If a scenario requires a Context to know another Context's private rules or data, revisit the boundary.
 
 ## Output Modes
 
-Choose the smallest useful output for the current stage:
+Select the output mode from the user's request and the available source facts:
 
-- **Interview mode**: one question, recommendation, evidence, and impact.
-- **Triage mode**: initial candidates, context gaps, confidence, and next question.
+- **Interview mode**: one question, source-supported interpretation when available, alternatives, evidence, and impact.
+- **Triage mode**: initial candidates, context gaps, source references, and next question.
 - **Synthesis mode**: Context Cards, glossary, Context Map, decisions, assumptions, and open questions.
 - **Review mode**: challenge boundaries, duplicated terms, hidden coupling, and unowned rules.
 
-When the user supplies only a short sentence, begin in Triage mode and ask the first high-impact question. When the user requests a final model or says the interview is complete, switch to Synthesis mode.
+When the user supplies only a short sentence, begin in Triage mode and ask the first question in the fixed order. When the user requests a final model or says the interview is complete, switch to Synthesis mode.
 
 ## Guardrails
 
@@ -253,7 +263,7 @@ When the user supplies only a short sentence, begin in Triage mode and ask the f
 - Do not confuse an event cancellation with cancellation of participation in an event.
 - Do not force a single global `User`, `Order`, `Product`, or `Event` model when meanings differ.
 - Do not prescribe microservices, databases, or team ownership solely from a Context Map.
-- Do not hide uncertainty behind polished diagrams. Mark provisional boundaries and competing hypotheses.
+- Do not convert competing hypotheses into facts or agreed boundaries.
 - When evidence conflicts, show the conflict and ask which source or domain owner is authoritative.
 
 ## Reference Material

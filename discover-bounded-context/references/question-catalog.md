@@ -42,7 +42,7 @@ Do not start with deployment or database questions unless the user explicitly as
 
 ### State and Lifecycle
 
-- What are the meaningful states before and after the action?
+- What named states exist before and after the action?
 - Which transitions are valid, and which are terminal?
 - Can the action be undone, repeated, or restored?
 - Is the state a current snapshot, a historical event, or both?
@@ -52,7 +52,7 @@ Do not start with deployment or database questions unless the user explicitly as
 - Which business area defines the rule?
 - What must be true atomically?
 - Which data or decision must remain private to this model?
-- Would a rule change for the same reason as the other concepts in this candidate Context?
+- Which named requirement, event, or policy changes this rule?
 
 ### Result and Event
 
@@ -75,30 +75,31 @@ Do not start with deployment or database questions unless the user explicitly as
 - Which Context publishes the definition or contract?
 - What would a domain expert call the concept in each workflow?
 
-## Recommended Question Format
+## Question Format
 
 ```markdown
 ### Question
 [One answerable decision]
 
-**Recommended answer:** [Current best interpretation]
-**Evidence:** [Observed phrase, source, or prior decision]
-**Why it matters:** [Boundary, lifecycle, rule, or integration affected]
+**Source-supported interpretation:** [State only when an explicit source supports one interpretation]
+**Evidence:** [Observed phrase, source ID, or prior decision]
+**Alternatives requiring a decision:** [Other interpretations]
+**Impact:** [Specific model field, state, rule, or relationship affected]
 ```
 
 ## Context Gap Record
 
 ```markdown
-| Source phrase | Missing slot | Candidate interpretations | Severity | Next question | Status |
-|---|---|---|---|---|---|
+| Source ID / phrase | Missing slot | Candidate interpretations | Next question | Status |
+|---|---|---|---|---|
 ```
 
-Use `Unknown` when no interpretation is justified. Use `Assumption` only when proceeding with a clearly stated, reversible default.
+Use `Unknown` when no interpretation is justified. Put unsupported interpretations in the alternatives list or open questions. Use `Assumption` only when the user explicitly accepts a reversible default. Do not assign confidence or severity labels.
 
 ## Boundary Review Checklist
 
 - Can each Context explain its key terms without importing another Context's private rules?
-- Does each Context own a meaningful business decision or lifecycle?
+- Does each Context have a named purpose and at least one in-scope term, command, event, state, or rule?
 - Are commands and events named from the perspective of the correct Context?
 - Are duplicated concepts intentionally translated rather than accidentally shared?
 - Are cross-Context rules expressed as contracts or policies rather than hidden coupling?
