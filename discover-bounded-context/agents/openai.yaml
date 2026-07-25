@@ -1,0 +1,4 @@
+interface:
+  display_name: "Discover Bounded Context"
+  short_description: "文脈の不足を質問で埋めてDDDの境界と用語を発見する"
+  default_prompt: "Use $discover-bounded-context to interview me about a domain and produce a traceable Bounded Context map."
