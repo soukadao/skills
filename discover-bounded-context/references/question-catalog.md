@@ -17,6 +17,18 @@ Use this catalog to choose the next question. Ask one question at a time and ada
 
 Do not start with deployment or database questions unless the user explicitly asks for physical architecture. A physical boundary cannot resolve an undefined business meaning.
 
+## Atomic Decomposition
+
+Split a paragraph or bullet when it contains multiple independent targets, actions, state transitions, rules, triggers, or outcomes. Preserve the original source ID and add alphabetic suffixes in source order.
+
+```text
+R-006a: 主催者はイベントを中止または延期できる。
+R-006b: イベントが中止された場合、参加費を返金する。
+R-006b depends on R-006a
+```
+
+Keep the parent source ID, derived ID, and dependency in the evidence record. Do not discard the original wording.
+
 ## Question Families
 
 ### Target and Meaning
@@ -95,6 +107,16 @@ Do not start with deployment or database questions unless the user explicitly as
 ```
 
 Use `Unknown` when no interpretation is justified. Put unsupported interpretations in the alternatives list or open questions. Use `Assumption` only when the user explicitly accepts a reversible default. Do not assign confidence or severity labels.
+
+When summarizing a boundary, use:
+
+```text
+Source-supported observation: [What the cited source explicitly describes]
+Unresolved decision: [What has not been decided]
+Evidence status: Fact | Inferred | Assumption | Unknown
+```
+
+Do not replace missing evidence with subjective wording such as `可能性が高い`, `自然`, `妥当`, `まずは`, `基本的に`, or `〜と考えられる`.
 
 ## Boundary Review Checklist
 

@@ -28,6 +28,7 @@ Do not treat a Bounded Context as a synonym for a microservice, database, team, 
 - Separate `Fact`, `Inferred`, `Assumption`, and `Unknown`. Keep competing interpretations until evidence or a decision resolves them.
 - Put only `Fact` items and explicit user decisions in the settled model. Put `Inferred` and `Assumption` items under candidate interpretations, and put `Unknown` items under open questions.
 - Preserve source traceability. Link every important term, rule, event, and boundary claim to a document section, file path, line, interview answer, or explicit user decision when available.
+- Use evidence statements instead of subjective evaluations. Do not write `可能性が高い`, `自然`, `妥当`, `まずは`, `基本的に`, `〜と考えられる`, or equivalent hedging unless the source explicitly contains that judgment. Replace them with the cited observation, alternatives, and `Unknown` or `Inferred` status.
 - Ask for a concrete decision, not approval of the analysis. Do not ask “Does this look right?” when the actual missing decision can be stated directly.
 - Use the user's language for domain terms. Introduce English names only when needed for code or integration mapping.
 - Do not convert every noun into a class. Model the role, identity, lifecycle, rules, and ownership of each concept.
@@ -52,10 +53,22 @@ If the request is underspecified but exploration is safe, state the missing scop
 
 Before analysis, assign stable source IDs to paragraphs or bullets, such as `R-001`, `R-002`, and `R-003`. Preserve explicit section and bullet identifiers when they exist. Cite these IDs in every extracted fact, rule, event, and boundary claim. If no stable ID can be created, cite an exact quote instead of inventing a requirement number.
 
-Break prose, scenarios, and event flows into atomic statements. Capture each statement using this shape:
+Split each paragraph or bullet into one atomic business assertion when it contains multiple independent targets, actions, state transitions, rules, triggers, or outcomes. Preserve the original source ID as the parent ID and assign alphabetic suffixes in source order, such as `R-006a` and `R-006b`. Record causal or dependency links between derived assertions.
+
+For example:
 
 ```text
-Source ID / quote:
+R-006a: 主催者はイベントを中止または延期できる。
+R-006b: イベントが中止された場合、参加費を返金する。
+R-006b depends on R-006a
+```
+
+Capture each atomic statement using this shape:
+
+```text
+Derived ID:
+Parent source ID / quote:
+Depends on:
 Actor / role:
 Trigger:
 Intent / command:
@@ -99,6 +112,14 @@ For each unit, mark missing or conflicting slots. Always check:
 - **Source of truth**: which document, system, or role owns the definition?
 
 Queue unresolved slots using the fixed question order. Do not assign subjective severity or confidence labels. Keep the source ID, missing slot, candidate interpretations, and next question in the gap record.
+
+When summarizing a boundary, use this form:
+
+```text
+Source-supported observation: [What the cited sources explicitly describe]
+Unresolved decision: [What has not been decided]
+Evidence status: Fact | Inferred | Assumption | Unknown
+```
 
 ### 4. Interview One Question at a Time
 
@@ -264,6 +285,7 @@ When the user supplies only a short sentence, begin in Triage mode and ask the f
 - Do not force a single global `User`, `Order`, `Product`, or `Event` model when meanings differ.
 - Do not prescribe microservices, databases, or team ownership solely from a Context Map.
 - Do not convert competing hypotheses into facts or agreed boundaries.
+- Do not use subjective conclusions such as "likely", "natural", "appropriate", or "for now" in place of source evidence. State the observation and ask about the unresolved decision.
 - When evidence conflicts, show the conflict and ask which source or domain owner is authoritative.
 
 ## Reference Material
