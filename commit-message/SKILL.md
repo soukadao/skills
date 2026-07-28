@@ -11,6 +11,7 @@ description: Use when preparing Git commits, staging related changes in focused 
 - Do not split commits based only on file count or implementation steps.
 - Separate changes made for different reasons or intents into different commits.
 - Keep each commit independently revertible.
+- When one file contains different intents, use hunk-based staging such as `git add -p` when separating the hunks makes each commit's intent, reviewability, and revertability clearer. Keep related hunks together when splitting them would break dependencies or make a commit incomplete.
 
 ## Commit Message
 
