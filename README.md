@@ -46,7 +46,6 @@ Codex やエージェントに特定の作業手順、判断基準、ツール�
 | `browser-to-k6-load-testing` | 既存 HAR や Playwright HAR 記録仕様から、保守しやすい k6 スクリプトへ変換する。 |
 | `k6-load-testing` | 既存 k6 スクリプトを実行・調整し、結果や失敗原因をまとめる。 |
 | `nuclei-security-testing` | HTTP リクエストや API 情報から Nuclei テンプレートを作成・実行し、結果を分析する。 |
-| `repo-onboarding` | 未知のリポジトリを素早く調査し、構造、重要ファイル、セットアップ、テスト方法を把握する。 |
 | `task-decomposer` | 複雑または曖昧な作業を、1-60 分で完了できる観測可能なタスクに分解する。 |
 | `critical-thinking-reviewer` | 提案、計画、分析、判断を批判的に確認し、弱い前提、証拠不足、反例、代替案、失敗モードを洗い出す。 |
 | `commit-message` | 関連変更を適切にまとめ、lowercase conventional prefix のコミットメッセージを作る。 |

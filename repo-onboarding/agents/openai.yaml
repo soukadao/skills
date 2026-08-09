@@ -1,4 +1,0 @@
-interface:
-  display_name: "Repo Onboarding"
-  short_description: "Understand unfamiliar codebases quickly"
-  default_prompt: "Use $repo-onboarding to summarize this repository's structure, setup, key workflows, and likely next files to inspect."
